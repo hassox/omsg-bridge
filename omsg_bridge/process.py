@@ -31,6 +31,7 @@ class Child:
         self.process = process
         self.stderr = bytearray()
         self.stderr_task = asyncio.create_task(self.drain_stderr())
+        self.cleanup_task = None
 
     async def drain_stderr(self):
         while chunk := await self.process.stderr.read(8192):
@@ -40,6 +41,19 @@ class Child:
         return self.stderr.decode("utf-8", errors="replace")
 
     async def stop(self):
+        if self.cleanup_task is None:
+            self.cleanup_task = asyncio.create_task(self._stop())
+        cancelled = False
+        while not self.cleanup_task.done():
+            try:
+                await asyncio.shield(self.cleanup_task)
+            except asyncio.CancelledError:
+                cancelled = True
+        self.cleanup_task.result()
+        if cancelled:
+            raise asyncio.CancelledError
+
+    async def _stop(self):
         # Terminate this child's process group, not Messages.app or unrelated processes.
         try:
             os.killpg(self.process.pid, signal.SIGTERM)
@@ -51,20 +65,23 @@ class Child:
                 pass
 
         drain = asyncio.create_task(discard_stdout())
+        wait = asyncio.create_task(self.process.wait())
         try:
-            async with asyncio.timeout(1):
-                await asyncio.shield(self.process.wait())
-        except TimeoutError:
+            try:
+                async with asyncio.timeout(1):
+                    await asyncio.shield(wait)
+            except TimeoutError:
+                pass
+            # The group can outlive its leader (e.g. an osascript child).
             try:
                 os.killpg(self.process.pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-            await self.process.wait()
+            await wait
         finally:
             drain.cancel()
-            await asyncio.gather(drain, return_exceptions=True)
-        self.stderr_task.cancel()
-        await asyncio.gather(self.stderr_task, return_exceptions=True)
+            self.stderr_task.cancel()
+            await asyncio.gather(drain, self.stderr_task, return_exceptions=True)
 
     async def line(self):
         try:
@@ -97,11 +114,25 @@ class Bridge:
         self.settings = settings
         self.children = set()
         self.tasks = set()
+        self.closing = False
 
     @asynccontextmanager
     async def spawn(self, argv):
-        try:
-            process = await asyncio.create_subprocess_exec(
+        # Reserve before awaiting spawn: reject excess work rather than queue it.
+        if self.closing:
+            raise APIError(503, "shutting_down", "Server is shutting down", retry_safe=True)
+        if len(self.tasks) >= 8:
+            raise APIError(
+                503,
+                "busy",
+                "All 8 imsg slots are in use; close a stream or try later",
+                retry_safe=True,
+            )
+        task = asyncio.current_task()
+        self.tasks.add(task)
+        child = None
+        spawn = asyncio.create_task(
+            asyncio.create_subprocess_exec(
                 self.settings.imsg,
                 *argv,
                 stdin=asyncio.subprocess.PIPE,
@@ -110,6 +141,17 @@ class Bridge:
                 limit=MAX_RECORD,
                 start_new_session=True,
             )
+        )
+        try:
+            try:
+                process = await asyncio.shield(spawn)
+            except asyncio.CancelledError:
+                # A cancelled handshake can race OS process creation; still reap the result.
+                child = Child(await spawn)
+                raise
+            child = Child(process)
+            self.children.add(child)
+            yield child
         except OSError as exc:
             raise APIError(
                 503,
@@ -118,18 +160,16 @@ class Bridge:
                 "check the imsg setting and executable permissions.",
                 retry_safe=True,
             ) from exc
-        child = Child(process)
-        self.children.add(child)
-        task = asyncio.current_task()
-        self.tasks.add(task)
-        try:
-            yield child
         finally:
-            await child.stop()
-            self.children.discard(child)
-            self.tasks.discard(task)
+            try:
+                if child is not None:
+                    await child.stop()
+            finally:
+                self.children.discard(child)
+                self.tasks.discard(task)
 
     async def close(self):
+        self.closing = True
         tasks = tuple(self.tasks)
         for task in tasks:
             task.cancel()

@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import hmac
 import logging
 import shutil
@@ -12,10 +13,48 @@ from .catalog import CATALOG, COMMANDS, openapi, query_payload
 from .config import DEFAULT_CONFIG, Settings, load_settings
 from .errors import APIError
 from .process import Bridge
-from .streams import SOCKETS, stream
+from .streams import SOCKETS, close_socket, stream
 
 SETTINGS = web.AppKey("settings", Settings)
 BRIDGE = web.AppKey("bridge", Bridge)
+REQUESTS = web.AppKey("requests", set)
+
+
+@web.middleware
+async def resources(request, handler):
+    if request.path == "/health":
+        return await handler(request)
+    active = request.app[REQUESTS]
+    if request.app[BRIDGE].closing or len(active) >= 8:
+        return web.json_response(
+            {
+                "error": {
+                    "code": "busy",
+                    "message": "Server is busy or shutting down",
+                    "retry_safe": True,
+                }
+            },
+            status=503,
+        )
+    task = asyncio.current_task()
+    active.add(task)
+    try:
+        response = await handler(request)
+        if not isinstance(response, web.WebSocketResponse):
+            try:
+                async with asyncio.timeout(10):
+                    await response.prepare(request)
+                    await response.write_eof()
+            except TimeoutError:
+                if request.transport is not None:
+                    request.transport.close()
+            finally:
+                # aiohttp retains the last response while its connection is idle.
+                if isinstance(response, web.Response):
+                    response.body = None
+        return response
+    finally:
+        active.discard(task)
 
 
 @web.middleware
@@ -101,7 +140,13 @@ validatorUrl: null, persistAuthorization: false});""",
 async def json_body(request):
     if request.content_type != "application/json":
         raise web.HTTPUnsupportedMediaType(reason="Use Content-Type: application/json")
-    return await request.json()
+    try:
+        async with asyncio.timeout(10):
+            return await request.json()
+    except TimeoutError as exc:
+        raise web.HTTPRequestTimeout(
+            reason="Request body did not arrive within 10 seconds"
+        ) from exc
 
 
 async def command(request):
@@ -127,17 +172,22 @@ async def rpc_websocket(request):
 
 
 async def shutdown(app):
-    for ws in tuple(app[SOCKETS]):
-        await ws.close(code=1001, message=b"Server shutdown; refresh history after reconnect")
-    await app[BRIDGE].close()
+    app[BRIDGE].closing = True
+    try:
+        await asyncio.gather(
+            *(close_socket(ws, transport) for ws, transport in tuple(app[SOCKETS].items()))
+        )
+    finally:
+        await app[BRIDGE].close()
 
 
 def create_app(settings):
     settings.validate()
-    app = web.Application(middlewares=[boundary], client_max_size=1024 * 1024)
+    app = web.Application(middlewares=[resources, boundary], client_max_size=1024 * 1024)
     app[SETTINGS] = settings
     app[BRIDGE] = Bridge(settings)
-    app[SOCKETS] = set()
+    app[SOCKETS] = {}
+    app[REQUESTS] = set()
     app.on_shutdown.append(shutdown)
     app.add_routes(
         [

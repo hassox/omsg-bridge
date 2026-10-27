@@ -15,6 +15,7 @@ A small, asynchronous macOS LAN bridge over `imsg`: REST, WebSockets, OpenAPI an
 - TDD: add a failing test, implement the minimum, run tests and end-to-end checks using a fake executable over real TCP/stdio.
 - Keep command metadata, routes, OpenAPI, MCP discovery and README consistent. Document supported upstream revision and limitations.
 - Use async I/O for subprocesses, network and streams. Watchers must not block reads or writes. Clean up subprocesses on disconnect/shutdown; bound output and report failures usefully.
+- Long uptime with bounded memory/CPU is a release requirement. Keep admission through response transmission, reject excess work rather than queue it, use bounded output/backpressure, and await cancellation-resistant child cleanup. Add lifecycle/churn/RSS/idle-CPU regressions for resource-sensitive changes; never claim third-party/infinite-uptime guarantees from a finite soak.
 - Ask independent subagents to verify assumptions and completed work when authorized by the operator (authorized for the initial build). Review findings yourself.
 - Make small working commits. Inspect staged files for secrets before each commit. Never commit runtime `.pi` artifacts.
 

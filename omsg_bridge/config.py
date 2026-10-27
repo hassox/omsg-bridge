@@ -52,6 +52,6 @@ def load_settings(path=DEFAULT_CONFIG, environ=None):
     return Settings(
         **data,
         auth_enabled=auth.get("enabled", True),
-        username=auth.get("username", ""),
-        password=auth.get("password", ""),
+        username=environ.get("OMSG_USERNAME", auth.get("username", "")),
+        password=environ.get("OMSG_PASSWORD", auth.get("password", "")),
     ).validate()

@@ -63,6 +63,11 @@ async def test_docs_are_local_and_openapi_valid(aiohttp_client):
     client = await aiohttp_client(create_app(Settings(auth_enabled=False)))
     spec = await (await client.get("/docs/openapi.json")).json()
     validate(spec)
+    assert spec["openapi"].startswith("3.0.")  # Local Swagger UI 4 supports OpenAPI 3.0.
+    envelope = spec["paths"]["/v1/chats"]["post"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+    assert set(envelope["properties"]) == {"data", "stderr"}
     assert "/health" in spec["paths"]
     html = await (await client.get("/docs/ui")).text()
     assert "https://" not in html

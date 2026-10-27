@@ -1,7 +1,7 @@
 # Upstream reference and notices
 
 `omsg_bridge/commands.json` contains descriptions and option metadata derived from
-`imsg v0.19.1`'s `imsg completions llm`. imsg is MIT licensed, copyright (c) 2025
+`imsg v0.19.1`'s `imsg completions llm`. imsg is MIT licensed, copyright (c) 2026
 Peter Steinberger. The MIT license grant and disclaimer in `LICENSE` also apply
 to this derived material; upstream: https://github.com/openclaw/imsg/blob/v0.19.1/LICENSE.
 

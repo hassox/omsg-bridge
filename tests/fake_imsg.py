@@ -3,6 +3,7 @@
 
 import json
 import os
+import signal
 import sys
 import time
 
@@ -14,6 +15,28 @@ def emit(value):
 command = sys.argv[1]
 options = dict(arg[2:].split("=", 1) for arg in sys.argv[2:] if arg.startswith("--") and "=" in arg)
 scenario = options.get("db", "")
+if scenario == "ignore-term":
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+if scenario == "large-json":
+    emit({"text": "x" * (8 * 1024 * 1024)})
+    sys.exit(0)
+if scenario == "descendant":
+    read_fd, write_fd = os.pipe()
+    descendant = os.fork()
+    if descendant == 0:
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        os.close(read_fd)
+        for fd in (0, 1, 2):
+            os.close(fd)
+        os.write(write_fd, b"ready")
+        os.close(write_fd)
+        while True:
+            time.sleep(1)
+    os.close(write_fd)
+    os.read(read_fd, 5)
+    os.close(read_fd)
+    emit({"descendant": descendant})
+    sys.exit(0)
 if scenario == "fail":
     emit({"success": False, "error": "synthetic refusal"})
     print("Full Disk Access required (synthetic)", file=sys.stderr)

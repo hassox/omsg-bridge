@@ -1,8 +1,9 @@
 import asyncio
+import base64
 import os
 
 import pytest
-from aiohttp import BasicAuth, WSMsgType, WSServerHandshakeError
+from aiohttp import WSMsgType, WSServerHandshakeError
 
 from omsg_bridge.config import Settings
 from omsg_bridge.server import create_app
@@ -63,16 +64,15 @@ async def test_ws_auth_and_origin(aiohttp_client, fake_imsg):
     client = await aiohttp_client(
         create_app(Settings(imsg=fake_imsg, username="test", password="synthetic"))
     )
+    headers = {"Authorization": "Basic " + base64.b64encode(b"test:synthetic").decode()}
     for path in ("/v1/watch", "/v1/rpc/ws"):
         with pytest.raises(WSServerHandshakeError) as caught:
             await client.ws_connect(path)
         assert caught.value.status == 401
         with pytest.raises(WSServerHandshakeError) as caught:
-            await client.ws_connect(
-                path, auth=BasicAuth("test", "synthetic"), origin="https://bad.invalid"
-            )
+            await client.ws_connect(path, headers=headers, origin="https://bad.invalid")
         assert caught.value.status == 403
-    async with client.ws_connect("/v1/watch", auth=BasicAuth("test", "synthetic")) as ws:
+    async with client.ws_connect("/v1/watch", headers=headers) as ws:
         assert (await ws.receive_json())["id"] == 1
 
 

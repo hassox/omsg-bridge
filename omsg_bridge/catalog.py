@@ -70,7 +70,7 @@ def input_schema(name):
             "required": ["jsonrpc", "id", "method"],
             "properties": {
                 "jsonrpc": {"type": "string", "enum": ["2.0"]},
-                "id": {"type": ["string", "number", "null"]},
+                "id": {"oneOf": [{"type": "string", "nullable": True}, {"type": "number"}]},
                 "method": {"type": "string"},
                 "params": {"type": "object"},
             },
@@ -84,7 +84,11 @@ def input_schema(name):
             properties[key]["oneOf"] = [
                 {"type": "string"},
                 {"type": "number"},
-                {"type": "array", "minItems": 1, "items": {"type": ["string", "number"]}},
+                {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {"oneOf": [{"type": "string"}, {"type": "number"}]},
+                },
             ]
     return {
         "type": "object",
@@ -112,9 +116,11 @@ def openapi():
         400: "Invalid request",
         401: "Basic Auth required",
         403: "Cross-origin request rejected",
-        413: "Payload/output too large",
+        408: "Request body timeout",
+        413: "Request payload too large",
+        415: "Use application/json",
         502: "imsg failed or returned invalid output",
-        503: "imsg unavailable",
+        503: "imsg unavailable, busy (8 slots), or shutting down",
         504: "Timed out; mutation outcome may be unknown",
     }.items():
         responses[str(status)] = {
@@ -143,6 +149,31 @@ def openapi():
         "/v1/commands": {"get": {"summary": "Command discovery", "responses": responses}},
     }
     for name, spec in COMMANDS.items():
+        command_responses = (
+            responses
+            if name == "rpc"
+            else {
+                **responses,
+                "200": {
+                    "description": "Unmodified upstream records; completions returns one string",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["data", "stderr"],
+                                "properties": {
+                                    "data": {"type": "array", "items": {}},
+                                    "stderr": {
+                                        "type": "string",
+                                        "description": "Diagnostics (at most 64 KiB)",
+                                    },
+                                },
+                            }
+                        }
+                    },
+                },
+            }
+        )
         path = f"/v1/{name}"
         if name == "watch":
             paths[path] = {
@@ -158,9 +189,10 @@ def openapi():
                     "description": spec["description"],
                     "operationId": name.replace("-", "_"),
                     "requestBody": {
-                        "content": {"application/json": {"schema": input_schema(name)}}
+                        "required": True,
+                        "content": {"application/json": {"schema": input_schema(name)}},
                     },
-                    "responses": responses,
+                    "responses": command_responses,
                 }
             }
         if spec["read_only"] or name == "watch":
@@ -186,17 +218,26 @@ def openapi():
                 **paths[path].get("get", {}),
                 "summary": spec["description"].split("\n")[0],
                 "parameters": parameters,
-                "responses": paths[path].get("get", {}).get("responses", responses),
+                "responses": paths[path].get("get", {}).get("responses", command_responses),
             }
+    paths["/v1/rpc"]["post"]["parameters"] = [
+        {
+            "name": key,
+            "in": "query",
+            "description": option["description"],
+            "schema": {"type": "boolean" if option["type"] == "flag" else "string"},
+        }
+        for key, option in COMMANDS["rpc"]["options"].items()
+    ]
     paths["/v1/rpc/ws"] = {
         "get": {
             "summary": "WebSocket: bidirectional JSON-RPC with subscriptions",
-            "parameters": [{"name": "db", "in": "query", "schema": {"type": "string"}}],
+            "parameters": paths["/v1/rpc"]["post"]["parameters"],
             "responses": {"101": {"description": "WebSocket upgraded"}, **responses},
         }
     }
     return {
-        "openapi": "3.1.0",
+        "openapi": "3.0.3",
         "info": {
             "title": "omsg-bridge",
             "version": __version__,

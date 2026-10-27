@@ -8,7 +8,16 @@ from .catalog import build_argv, query_payload
 from .errors import APIError
 from .process import MAX_RECORD, validate_rpc
 
-SOCKETS = web.AppKey("sockets", set)
+SOCKETS = web.AppKey("sockets", dict)
+
+
+async def close_socket(ws, transport):
+    try:
+        async with asyncio.timeout(1):
+            await ws.close(drain=False)
+    except (ConnectionError, TimeoutError):
+        if transport is not None:
+            transport.close()
 
 
 async def stream(request, bridge, *, rpc=False):
@@ -20,7 +29,7 @@ async def stream(request, bridge, *, rpc=False):
         raise web.HTTPBadRequest(reason="This endpoint requires a WebSocket upgrade")
     async with bridge.spawn(argv) as child:
         await ws.prepare(request)
-        request.app[SOCKETS].add(ws)
+        request.app[SOCKETS][ws] = request.transport
 
         async def output():
             while True:
@@ -71,6 +80,8 @@ async def stream(request, bridge, *, rpc=False):
             for task in tasks:
                 task.cancel()
             await asyncio.gather(*tasks, return_exceptions=True)
-            request.app[SOCKETS].discard(ws)
-            await ws.close()
+            try:
+                await close_socket(ws, request.transport)
+            finally:
+                request.app[SOCKETS].pop(ws, None)
     return ws
