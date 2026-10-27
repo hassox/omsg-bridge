@@ -8,17 +8,14 @@ from aiohttp import BasicAuth, web
 from swagger_ui_bundle import swagger_ui_path
 
 from . import __version__
-from .catalog import CATALOG, openapi
+from .catalog import CATALOG, COMMANDS, openapi, query_payload
 from .config import DEFAULT_CONFIG, Settings, load_settings
+from .errors import APIError
+from .process import Bridge
+from .streams import SOCKETS, stream
 
 SETTINGS = web.AppKey("settings", Settings)
-
-
-class APIError(Exception):
-    def __init__(self, status, code, message, **details):
-        super().__init__(message)
-        self.status = status
-        self.payload = {"error": {"code": code, "message": message, **details}}
+BRIDGE = web.AppKey("bridge", Bridge)
 
 
 @web.middleware
@@ -101,10 +98,47 @@ validatorUrl: null, persistAuthorization: false});""",
     )
 
 
+async def json_body(request):
+    if request.content_type != "application/json":
+        raise web.HTTPUnsupportedMediaType(reason="Use Content-Type: application/json")
+    return await request.json()
+
+
+async def command(request):
+    name = request.match_info["command"]
+    payload = (
+        query_payload(name, request.query) if request.method == "GET" else await json_body(request)
+    )
+    return web.json_response(await request.app[BRIDGE].execute(name, payload))
+
+
+async def rpc(request):
+    payload = await json_body(request)
+    options = query_payload("rpc", request.query)["options"]
+    return web.json_response(await request.app[BRIDGE].rpc(payload, options))
+
+
+async def watch(request):
+    return await stream(request, request.app[BRIDGE])
+
+
+async def rpc_websocket(request):
+    return await stream(request, request.app[BRIDGE], rpc=True)
+
+
+async def shutdown(app):
+    for ws in tuple(app[SOCKETS]):
+        await ws.close(code=1001, message=b"Server shutdown; refresh history after reconnect")
+    await app[BRIDGE].close()
+
+
 def create_app(settings):
     settings.validate()
     app = web.Application(middlewares=[boundary], client_max_size=1024 * 1024)
     app[SETTINGS] = settings
+    app[BRIDGE] = Bridge(settings)
+    app[SOCKETS] = set()
+    app.on_shutdown.append(shutdown)
     app.add_routes(
         [
             web.get("/health", health),
@@ -115,6 +149,16 @@ def create_app(settings):
         ]
     )
     app.router.add_static("/docs/assets", swagger_ui_path)
+    app.router.add_post("/v1/rpc", rpc)
+    app.router.add_get("/v1/watch", watch)
+    app.router.add_get("/v1/rpc/ws", rpc_websocket)
+    for name, definition in COMMANDS.items():
+        if definition["mode"] == "stream":
+            continue
+        path = "/v1/{command:" + name + "}"
+        app.router.add_post(path, command)
+        if definition["read_only"]:
+            app.router.add_get(path, command)
     return app
 
 
