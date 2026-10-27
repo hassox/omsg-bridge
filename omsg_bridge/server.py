@@ -1,0 +1,141 @@
+import argparse
+import hmac
+import logging
+import shutil
+from urllib.parse import urlsplit
+
+from aiohttp import BasicAuth, web
+from swagger_ui_bundle import swagger_ui_path
+
+from . import __version__
+from .catalog import CATALOG, openapi
+from .config import DEFAULT_CONFIG, Settings, load_settings
+
+SETTINGS = web.AppKey("settings", Settings)
+
+
+class APIError(Exception):
+    def __init__(self, status, code, message, **details):
+        super().__init__(message)
+        self.status = status
+        self.payload = {"error": {"code": code, "message": message, **details}}
+
+
+@web.middleware
+async def boundary(request, handler):
+    try:
+        origin = request.headers.get("Origin")
+        if origin and (
+            urlsplit(origin).scheme != request.scheme or urlsplit(origin).netloc != request.host
+        ):
+            raise APIError(403, "cross_origin", "Cross-origin browser requests are not allowed")
+        settings = request.app[SETTINGS]
+        if settings.auth_enabled:
+            try:
+                auth = BasicAuth.decode(request.headers.get("Authorization", ""), encoding="utf-8")
+                valid = hmac.compare_digest(
+                    auth.login.encode(), settings.username.encode()
+                ) & hmac.compare_digest(auth.password.encode(), settings.password.encode())
+            except ValueError:
+                valid = False
+            if not valid:
+                return web.json_response(
+                    {"error": {"code": "unauthorized", "message": "Basic Auth required"}},
+                    status=401,
+                    headers={
+                        "WWW-Authenticate": 'Basic realm="omsg-bridge", charset="UTF-8"',
+                        "Cache-Control": "no-store",
+                    },
+                )
+        response = await handler(request)
+    except APIError as exc:
+        response = web.json_response(exc.payload, status=exc.status)
+    except (ValueError, TypeError) as exc:
+        response = web.json_response(
+            {"error": {"code": "invalid_request", "message": str(exc)}}, status=400
+        )
+    except web.HTTPException as exc:
+        response = web.json_response(
+            {"error": {"code": "http_error", "message": exc.reason}}, status=exc.status
+        )
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    return response
+
+
+async def health(request):
+    return web.json_response(
+        {
+            "status": "ok",
+            "version": __version__,
+            "imsg_available": shutil.which(request.app[SETTINGS].imsg) is not None,
+        }
+    )
+
+
+async def spec(request):
+    return web.json_response(openapi())
+
+
+async def commands(request):
+    return web.json_response(CATALOG)
+
+
+async def docs(request):
+    return web.Response(
+        text="""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>omsg-bridge API</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/docs/assets/swagger-ui.css"></head><body>
+<div id="swagger-ui"></div><script src="/docs/assets/swagger-ui-bundle.js"></script>
+<script src="/docs/init.js"></script></body></html>""",
+        content_type="text/html",
+    )
+
+
+async def docs_init(request):
+    return web.Response(
+        text="""SwaggerUIBundle({url: "/docs/openapi.json", dom_id: "#swagger-ui",
+validatorUrl: null, persistAuthorization: false});""",
+        content_type="text/javascript",
+    )
+
+
+def create_app(settings):
+    settings.validate()
+    app = web.Application(middlewares=[boundary], client_max_size=1024 * 1024)
+    app[SETTINGS] = settings
+    app.add_routes(
+        [
+            web.get("/health", health),
+            web.get("/v1/commands", commands),
+            web.get("/docs/openapi.json", spec),
+            web.get("/docs/ui", docs),
+            web.get("/docs/init.js", docs_init),
+        ]
+    )
+    app.router.add_static("/docs/assets", swagger_ui_path)
+    return app
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Async REST/WebSocket bridge over imsg")
+    parser.add_argument("--config", default=DEFAULT_CONFIG, help="Settings TOML path")
+    args = parser.parse_args()
+    try:
+        settings = load_settings(args.config)
+    except (ValueError, OSError) as exc:
+        parser.exit(2, f"Configuration error: {exc}\n")
+    logging.basicConfig(level=logging.WARNING)
+    web.run_app(
+        create_app(settings),
+        host=settings.host,
+        port=settings.port,
+        access_log=None,
+        print=None,
+        handler_cancellation=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

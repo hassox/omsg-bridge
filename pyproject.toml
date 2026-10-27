@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "omsg-bridge"
+version = "0.1.0"
+description = "A lightweight asynchronous REST, WebSocket and MCP bridge for imsg"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = ["aiohttp>=3.12,<4", "swagger-ui-bundle>=1.1,<2"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.20,<2"]
+dev = ["pytest>=8,<10", "pytest-asyncio>=1,<2", "pytest-aiohttp>=1,<2", "ruff>=0.14,<1", "openapi-spec-validator>=0.7,<0.9"]
+
+[project.scripts]
+omsg-bridge = "omsg_bridge.server:main"
+omsg-bridge-mcp = "omsg_bridge.mcp:main"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]

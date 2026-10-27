@@ -1,0 +1,1629 @@
+{
+  "upstream": "imsg v0.19.1 (Homebrew release)",
+  "commands": {
+    "chats": {
+      "description": "List recent conversations",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "limit": {
+          "type": "value",
+          "description": "Number of chats to list",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "no-contacts": {
+          "type": "flag",
+          "description": "Skip Contacts lookups and return raw handles",
+          "aliases": []
+        },
+        "unread-only": {
+          "type": "flag",
+          "description": "Return only chats with unread inbound messages",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "stats": {
+      "description": "Show aggregate message and media statistics",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "Limit stats to a chat rowid",
+          "aliases": []
+        },
+        "time-zone": {
+          "type": "value",
+          "description": "IANA time zone for date buckets (defaults to local)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "media": {
+          "type": "flag",
+          "description": "include attachment statistics",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "group": {
+      "description": "Show chat identity and participants for a chat id\n\nPrints chat identifier, guid, display name, service, group flag, and participants for a given chat rowid. Works for direct chats too.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid from 'imsg chats'",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "history": {
+      "description": "Show recent messages for a chat",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid from 'imsg chats'",
+          "aliases": []
+        },
+        "limit": {
+          "type": "value",
+          "description": "Number of messages to show",
+          "aliases": []
+        },
+        "participants": {
+          "type": "value",
+          "description": "filter by participant handles",
+          "aliases": []
+        },
+        "start": {
+          "type": "value",
+          "description": "ISO8601 start (inclusive)",
+          "aliases": []
+        },
+        "end": {
+          "type": "value",
+          "description": "ISO8601 end (exclusive)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "no-contacts": {
+          "type": "flag",
+          "description": "Skip Contacts lookups and return raw handles",
+          "aliases": []
+        },
+        "attachments": {
+          "type": "flag",
+          "description": "include attachment metadata",
+          "aliases": []
+        },
+        "convert-attachments": {
+          "type": "flag",
+          "description": "convert CAF/GIF attachments to model-compatible cached files",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "watch": {
+      "description": "Stream messages, edits, and unsends",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "limit to chat rowid",
+          "aliases": []
+        },
+        "debounce": {
+          "type": "value",
+          "description": "debounce interval for filesystem events (e.g. 250ms)",
+          "aliases": []
+        },
+        "since-rowid": {
+          "type": "value",
+          "description": "start watching after this rowid",
+          "aliases": []
+        },
+        "participants": {
+          "type": "value",
+          "description": "filter by participant handles",
+          "aliases": []
+        },
+        "start": {
+          "type": "value",
+          "description": "ISO8601 start (inclusive)",
+          "aliases": []
+        },
+        "end": {
+          "type": "value",
+          "description": "ISO8601 end (exclusive)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "attachments": {
+          "type": "flag",
+          "description": "include attachment metadata",
+          "aliases": []
+        },
+        "convert-attachments": {
+          "type": "flag",
+          "description": "convert CAF/GIF attachments to model-compatible cached files",
+          "aliases": []
+        },
+        "reactions": {
+          "type": "flag",
+          "description": "include reaction events (tapback add/remove) in the stream",
+          "aliases": []
+        },
+        "bb-events": {
+          "type": "flag",
+          "description": "include dylib-pushed events (typing, alias-removed) when injection is active",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "stream"
+    },
+    "send": {
+      "description": "Send a message (text and/or attachment)",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "to": {
+          "type": "value",
+          "description": "phone number or email",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid",
+          "aliases": []
+        },
+        "chat-identifier": {
+          "type": "value",
+          "description": "chat identifier (e.g. iMessage;+;chat...)",
+          "aliases": []
+        },
+        "chat-guid": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "text": {
+          "type": "value",
+          "description": "message body",
+          "aliases": []
+        },
+        "file": {
+          "type": "value",
+          "description": "path to attachment",
+          "aliases": []
+        },
+        "service": {
+          "type": "value",
+          "description": "service to use: imessage|sms|auto",
+          "aliases": []
+        },
+        "region": {
+          "type": "value",
+          "description": "default region for phone normalization",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "no-sms-fallback": {
+          "type": "flag",
+          "description": "disable automatic iMessage->SMS fallback for text-only auto phone sends",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "react": {
+      "description": "Send a standard tapback through Messages UI automation\n\nSends a standard tapback using Messages' last-or-selected-message shortcut.\n\nIMPORTANT LIMITATIONS:\n- Cannot reliably select a specific message; use bridge tapback for GUID targeting\n- Requires Messages.app to be running\n- The chat must exist in Messages' live AppleScript chats collection\n- Uses UI automation (System Events) which requires accessibility permissions\n- Opens the conversation directly and requires a visible, enabled Tapback button\n- Reports success only after a new outgoing reaction is recorded in the requested chat\n- If confirmation fails, inspect Messages before retrying; a retry may toggle a reaction\n\nReaction types:\n  love (❤️), like (👍), dislike (👎), laugh (😂), emphasis (‼️), question (❓)\n\nCustom emoji tapbacks can be read from history/watch output, but cannot be\nsent reliably through Messages.app AppleScript automation.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid to react in",
+          "aliases": []
+        },
+        "reaction": {
+          "type": "value",
+          "description": "reaction type: love, like, dislike, laugh, emphasis, question",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "read": {
+      "description": "Mark messages as read for a chat\n\nMarks messages as read via IMCore advanced features.\nRequires SIP disabled and Messages launched with `imsg launch`.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "to": {
+          "type": "value",
+          "description": "phone number or email",
+          "aliases": [
+            "handle"
+          ]
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid",
+          "aliases": []
+        },
+        "chat-identifier": {
+          "type": "value",
+          "description": "chat identifier (e.g. iMessage;-;+14155551212)",
+          "aliases": []
+        },
+        "chat-guid": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "typing": {
+      "description": "Send typing indicator to a chat\n\nSends typing indicators via IMCore advanced features.\nRequires SIP disabled and Messages launched with `imsg launch`.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "to": {
+          "type": "value",
+          "description": "phone number or email",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid",
+          "aliases": []
+        },
+        "chat-identifier": {
+          "type": "value",
+          "description": "chat identifier (e.g. iMessage;-;+14155551212)",
+          "aliases": []
+        },
+        "chat-guid": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "duration": {
+          "type": "value",
+          "description": "how long to show typing (e.g. 5s, 3000ms); omit for start-only",
+          "aliases": []
+        },
+        "stop": {
+          "type": "value",
+          "description": "stop typing indicator instead of starting",
+          "aliases": []
+        },
+        "service": {
+          "type": "value",
+          "description": "service to use: imessage|sms|auto",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "launch": {
+      "description": "Launch Messages.app with dylib injection\n\nEnsures Messages.app is running with DYLD_INSERT_LIBRARIES set to\ninject the imsg bridge helper dylib. Reuses a healthy current helper.\nThis enables advanced features like typing indicators and read receipts\nthat require IMCore framework access.\n\nIf Messages.app is already running with a dylib injected by a different\nimsg version, it is killed and relaunched with the current dylib under\nthe launch lock. Pass --force to relaunch even when the running dylib\nmatches.\n\n--install-agent installs and loads an opt-in login LaunchAgent that runs\nthis check at login and every 300 seconds (minimum 60 via --agent-interval).\n--uninstall-agent unloads and removes it. Neither flag can be combined\nwith --force or --kill-only. Headless Macs need automatic login.\nNon-interactive successful launches are quiet; JSON output is unchanged.\n\nRequires SIP (System Integrity Protection) to be disabled.",
+      "options": {
+        "dylib": {
+          "type": "value",
+          "description": "Custom path to imsg-bridge-helper.dylib",
+          "aliases": []
+        },
+        "agent-interval": {
+          "type": "value",
+          "description": "Agent interval in seconds (default 300, minimum 60; requires --install-agent)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "install-agent": {
+          "type": "flag",
+          "description": "Install and load the opt-in bridge login agent",
+          "aliases": []
+        },
+        "uninstall-agent": {
+          "type": "flag",
+          "description": "Unload and remove the bridge login agent",
+          "aliases": []
+        },
+        "kill-only": {
+          "type": "flag",
+          "description": "Only kill Messages.app, don't relaunch",
+          "aliases": []
+        },
+        "force": {
+          "type": "flag",
+          "description": "Relaunch even when Messages already runs the current dylib",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "status": {
+      "description": "Check availability of imsg advanced features\n\nDisplay the current status of imsg features and permissions.\nShows which advanced features (typing indicators, read receipts) are\navailable and provides setup instructions if needed.",
+      "options": {
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "rpc": {
+      "description": "Run JSON-RPC over stdin/stdout",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "stream"
+    },
+    "completions": {
+      "description": "Generate shell completions or LLM context\n\nOutputs completion scripts for bash, zsh, fish, or a Markdown CLI reference.",
+      "options": {},
+      "arguments": [
+        {
+          "name": "shell",
+          "optional": true,
+          "description": "bash, zsh, fish, or llm"
+        }
+      ],
+      "read_only": true,
+      "mode": "text"
+    },
+    "scheduled": {
+      "description": "List scheduled messages\n\nLists future scheduled rows read-only from chat.db.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "limit": {
+          "type": "value",
+          "description": "max rows for list",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [
+        {
+          "name": "action",
+          "optional": false,
+          "description": "list"
+        }
+      ],
+      "read_only": true,
+      "mode": "json"
+    },
+    "chat-background": {
+      "description": "Inspect a Messages chat background\n\nReads background metadata and cache state from the local Messages database. No bridge or SIP change is required.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "local chat ROWID",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [
+        {
+          "name": "action",
+          "optional": false,
+          "description": "status"
+        }
+      ],
+      "read_only": true,
+      "mode": "json"
+    },
+    "send-rich": {
+      "description": "Send a message via the IMCore bridge (effects, replies, subjects)\n\nRequires `imsg launch` (SIP-disabled, dylib injected). Unlike `imsg send`\nwhich uses AppleScript, this routes through Messages' private API for\nricher features: expressive-send effects, reply targets, subject lines.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid (e.g. iMessage;-;+15551234567)",
+          "aliases": []
+        },
+        "text": {
+          "type": "value",
+          "description": "message body",
+          "aliases": []
+        },
+        "file": {
+          "type": "value",
+          "description": "path to attachment",
+          "aliases": []
+        },
+        "url": {
+          "type": "value",
+          "description": "URL to send as a rich link preview",
+          "aliases": []
+        },
+        "effect": {
+          "type": "value",
+          "description": "expressive send id (impact, loud, gentle, invisibleink, confetti, …)",
+          "aliases": []
+        },
+        "subject": {
+          "type": "value",
+          "description": "subject line",
+          "aliases": []
+        },
+        "reply-to": {
+          "type": "value",
+          "description": "guid of message to reply to",
+          "aliases": []
+        },
+        "part": {
+          "type": "value",
+          "description": "part index (default 0)",
+          "aliases": []
+        },
+        "format": {
+          "type": "value",
+          "description": "JSON array of {start,length,styles:[...]} ranges (macOS 15+)",
+          "aliases": []
+        },
+        "format-file": {
+          "type": "value",
+          "description": "path to JSON file containing the format ranges array",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "no-dd-scan": {
+          "type": "flag",
+          "description": "disable data-detector scan deferral",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "send-multipart": {
+      "description": "Send a multi-part message\n\nPass --parts as a JSON array (e.g., '[{\"text\":\"hi\"},{\"text\":\"there\"}]')\nor via --parts-file pointing at a .json file. v1 supports text-only\nparts; mention/file parts are a future enhancement.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "parts": {
+          "type": "value",
+          "description": "JSON array of parts",
+          "aliases": []
+        },
+        "parts-file": {
+          "type": "value",
+          "description": "path to JSON file containing parts array",
+          "aliases": []
+        },
+        "effect": {
+          "type": "value",
+          "description": "expressive send id",
+          "aliases": []
+        },
+        "subject": {
+          "type": "value",
+          "description": "subject line",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "send-attachment": {
+      "description": "Send a file attachment via the IMCore bridge",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "file": {
+          "type": "value",
+          "description": "absolute path to file",
+          "aliases": []
+        },
+        "reply-to": {
+          "type": "value",
+          "description": "guid of message to reply to",
+          "aliases": []
+        },
+        "transport": {
+          "type": "value",
+          "description": "transport to use: auto|dylib|applescript",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "audio": {
+          "type": "flag",
+          "description": "send as audio message",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "send-sticker": {
+      "description": "Send an image as an iMessage sticker via the IMCore bridge\n\nRequires `imsg launch` (SIP-disabled, dylib injected). Sends the file as a\nsticker-attributed IMCore transfer. `--attach-to` associates the sticker\nwith an existing message bubble. Accepts PNG/APNG, GIF, or JPEG images up\nto 500 KiB, 618x618 pixels, 100 frames, and 25 million total decoded\npixels. Stickers are iMessage-only.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "file": {
+          "type": "value",
+          "description": "path to sticker image",
+          "aliases": []
+        },
+        "attach-to": {
+          "type": "value",
+          "description": "guid of message bubble to attach the sticker to",
+          "aliases": []
+        },
+        "target-part": {
+          "type": "value",
+          "description": "target bubble part index (default 0)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "poll": {
+      "description": "Send a native Apple Messages poll\n\nRequires `imsg launch` (SIP-disabled, dylib injected). Use the `send`\naction to create a native Messages Polls extension balloon, `vote`/`unvote`\nto select or remove a selection.\n\nMessages renders only the options on a poll balloon — the poll title is\nnever shown to recipients. So `send` automatically sends `--question` as a\nplain caption message right after the poll (matching how the native\n\"comment or Send\" field renders — a message with no thread metadata, not a\nthreaded reply). Callers pass only `--question` and the visible caption\nappears for free; `--comment` overrides the caption text when it should\ndiffer from the title. Use `--no-comment` when the caller renders its own\nvisible context before the poll.\n\nThe caption is best-effort but not silent: the result reports it under\n`comment` (`requested`, `sent`, `verified`, plus\n`error`/`disposition`/`retry_safe` when it fails or remains unresolved). A bridge\nacknowledgement is not proof of delivery, so the caption's row is looked\nup in the target chat before `sent` is reported true. `sent: null` means\ndelivery is unknown and must not be retried automatically. Re-send the\ncaption text alone only when `retry_safe` is true; never re-send the poll,\nwhich would duplicate the balloon.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid or rowid",
+          "aliases": []
+        },
+        "chat-id": {
+          "type": "value",
+          "description": "chat rowid",
+          "aliases": []
+        },
+        "question": {
+          "type": "value",
+          "description": "poll question. Messages does not render the poll title on the balloon, so imsg sends this as a plain caption message right after the poll (the visible text) and also stores it as the payload title for agent readback",
+          "aliases": []
+        },
+        "comment": {
+          "type": "value",
+          "description": "optional override for the caption text; defaults to --question. Sent as a plain message right after the poll, matching Messages' native 'comment or Send' field",
+          "aliases": []
+        },
+        "reply-to": {
+          "type": "value",
+          "description": "guid of message to reply to",
+          "aliases": []
+        },
+        "option": {
+          "type": "value",
+          "description": "poll option text; pass at least twice",
+          "aliases": []
+        },
+        "poll": {
+          "type": "value",
+          "description": "vote/unvote: guid of the poll message to update",
+          "aliases": []
+        },
+        "option-id": {
+          "type": "value",
+          "description": "vote/unvote: UUID of the option to select",
+          "aliases": []
+        },
+        "option-index": {
+          "type": "value",
+          "description": "vote/unvote: 1-based option number to select",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "no-comment": {
+          "type": "flag",
+          "description": "do not echo the question as a caption after the poll",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [
+        {
+          "name": "action",
+          "optional": false,
+          "description": "send|vote|unvote"
+        }
+      ],
+      "read_only": false,
+      "mode": "json"
+    },
+    "tapback": {
+      "description": "Send a tapback reaction via the IMCore bridge\n\n`imsg tapback` uses the bridge for reliability across macOS versions.\n`imsg react` (AppleScript) remains for SIP-on machines.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "message": {
+          "type": "value",
+          "description": "target message guid",
+          "aliases": []
+        },
+        "kind": {
+          "type": "value",
+          "description": "love|like|dislike|laugh|emphasize|question, or an emoji",
+          "aliases": []
+        },
+        "part": {
+          "type": "value",
+          "description": "part index",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "remove": {
+          "type": "flag",
+          "description": "remove this reaction instead of adding",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "edit": {
+      "description": "Edit a sent message\n\nRequires macOS 13+ (selector-probed at startup).",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "message": {
+          "type": "value",
+          "description": "target message guid",
+          "aliases": []
+        },
+        "new-text": {
+          "type": "value",
+          "description": "replacement text",
+          "aliases": []
+        },
+        "bc-text": {
+          "type": "value",
+          "description": "backwards-compat text shown to older clients (default: same as new-text)",
+          "aliases": []
+        },
+        "part": {
+          "type": "value",
+          "description": "part index",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "unsend": {
+      "description": "Retract a sent message\n\nRequires macOS 13+ (selector-probed at startup).",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "message": {
+          "type": "value",
+          "description": "target message guid",
+          "aliases": []
+        },
+        "part": {
+          "type": "value",
+          "description": "part index",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "delete-message": {
+      "description": "Delete a single message from a chat",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "message": {
+          "type": "value",
+          "description": "target message guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "notify-anyways": {
+      "description": "Force a notification for a message that was filtered/suppressed",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "message": {
+          "type": "value",
+          "description": "target message guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-create": {
+      "description": "Create a new chat (1:1 or group)\n\nRequires `imsg launch` (SIP-disabled, dylib injected). Vends handles for\neach address, including previously uncontacted recipients, through the\nactive iMessage account. Every recipient must pass an IDS availability\ncheck before the chat is created. Optionally sets a display name and sends an\ninitial message. Chat creation is currently iMessage-only; use\n`imsg send --service sms` for SMS sends.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "addresses": {
+          "type": "value",
+          "description": "comma-separated handles (phone or email)",
+          "aliases": []
+        },
+        "name": {
+          "type": "value",
+          "description": "group display name",
+          "aliases": []
+        },
+        "text": {
+          "type": "value",
+          "description": "initial message body",
+          "aliases": []
+        },
+        "service": {
+          "type": "value",
+          "description": "iMessage (default)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-name": {
+      "description": "Set a chat's display name",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "name": {
+          "type": "value",
+          "description": "new display name",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-photo": {
+      "description": "Set or clear a group chat photo\n\nOmit --file to clear the existing photo.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "file": {
+          "type": "value",
+          "description": "path to image (omit to clear)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-add-member": {
+      "description": "Add a participant to a group chat",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "address": {
+          "type": "value",
+          "description": "phone or email to add",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-remove-member": {
+      "description": "Remove a participant from a group chat",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "address": {
+          "type": "value",
+          "description": "phone or email to remove",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-leave": {
+      "description": "Leave a group chat",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-delete": {
+      "description": "Delete a chat from Messages.app",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "chat-mark": {
+      "description": "Mark a chat as read or unread",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "read": {
+          "type": "flag",
+          "description": "mark as read",
+          "aliases": []
+        },
+        "unread": {
+          "type": "flag",
+          "description": "mark as unread",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "search": {
+      "description": "Search local Messages history\n\nSearches the local chat.db, not the injected bridge. Use --match exact\nfor case-insensitive exact text matches; the default is contains.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "query": {
+          "type": "value",
+          "description": "search query (required)",
+          "aliases": []
+        },
+        "match": {
+          "type": "value",
+          "description": "exact|contains (default contains)",
+          "aliases": []
+        },
+        "limit": {
+          "type": "value",
+          "description": "maximum results (default 50)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": true,
+      "mode": "json"
+    },
+    "account": {
+      "description": "Show the active iMessage account, login, and aliases\n\nThe default mode reads the live account via the IMCore bridge (requires\n`imsg launch`, SIP disabled). Use --local for a SIP-free listing of the\naccount login(s) recorded in local chat.db history. Local mode reflects\naccounts observed in history rather than the live signed-in account; for\na single-account Mac these are equivalent.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "local": {
+          "type": "flag",
+          "description": "list accounts from local chat.db history (no SIP / bridge required)",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "whois": {
+      "description": "Check whether a handle is reachable on iMessage\n\nThe default mode performs a live reachability check via the IMCore bridge\n(requires `imsg launch`, SIP disabled). Use --local for a SIP-free check\nthat infers the preferred service from local chat.db history. Local mode\nonly resolves handles you already have message history with; unknown\nhandles report service \"unknown\".",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "address": {
+          "type": "value",
+          "description": "phone or email to check",
+          "aliases": []
+        },
+        "type": {
+          "type": "value",
+          "description": "phone|email",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "local": {
+          "type": "flag",
+          "description": "infer service from local chat.db history (no SIP / bridge required)",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "nickname": {
+      "description": "Show contact-card / nickname info for a handle\n\nThe default mode reads the contact-card nickname the correspondent shared\nover iMessage via the IMCore bridge (requires `imsg launch`, SIP disabled).\n\n--local is a SIP-free alternative that returns YOUR local AddressBook\ncontact name for the handle. NOTE: this is a different datum — it is your\nown contact label, not the iMessage-shared nickname/photo, which is only\navailable through the bridge.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "address": {
+          "type": "value",
+          "description": "phone or email",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "local": {
+          "type": "flag",
+          "description": "return local AddressBook contact name (no SIP; NOT the shared nickname)",
+          "aliases": []
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [],
+      "read_only": false,
+      "mode": "json"
+    },
+    "name-photo": {
+      "description": "Inspect or share your Messages Name & Photo\n\nRequires `imsg launch` (SIP disabled, dylib injected). `status` reads\nwhether Messages would offer Name & Photo sharing for the chat. `share`\nexplicitly sends your personal Name & Photo to every chat participant.",
+      "options": {
+        "db": {
+          "type": "value",
+          "description": "Path to chat.db (defaults to ~/Library/Messages/chat.db)",
+          "aliases": []
+        },
+        "chat": {
+          "type": "value",
+          "description": "chat guid",
+          "aliases": []
+        },
+        "log-level": {
+          "type": "value",
+          "description": "Set log level (trace|verbose|debug|info|warning|error|critical)",
+          "aliases": [
+            "logLevel"
+          ]
+        },
+        "verbose": {
+          "type": "flag",
+          "description": "Enable verbose logging",
+          "aliases": []
+        }
+      },
+      "arguments": [
+        {
+          "name": "action",
+          "optional": false,
+          "description": "status|share"
+        }
+      ],
+      "read_only": false,
+      "mode": "json"
+    }
+  }
+}
