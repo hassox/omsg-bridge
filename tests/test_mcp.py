@@ -40,3 +40,12 @@ async def test_mcp_real_stdio_discovery_and_execution(client, tmp_path):
             )
             assert result.isError
             assert "Full Disk Access" in str(result)
+            result = await session.call_tool(
+                "execute_action",
+                {
+                    "name": "rpc",
+                    "payload": {"jsonrpc": "2.0", "id": 1, "method": "synthetic.error"},
+                },
+            )
+            assert result.isError
+            assert "retry_safe" in str(result) and "Synthetic uncertain delivery" in str(result)

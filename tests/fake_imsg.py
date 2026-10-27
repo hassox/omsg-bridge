@@ -54,6 +54,9 @@ if scenario == "stderr":
     sys.stderr.flush()
 if command == "watch":
     emit({"id": 1, "text": "synthetic", "pid": os.getpid()})
+    if scenario == "flood":
+        while True:
+            emit({"text": "x" * (128 * 1024)})
     for event in (
         {"id": 2, "is_reaction": True},
         {"id": 1, "type": "edited"},
@@ -71,6 +74,19 @@ elif command == "rpc":
         if "id" not in request:
             continue
         method = request["method"]
+        if method == "synthetic.error":
+            emit(
+                {
+                    "jsonrpc": "2.0",
+                    "id": request["id"],
+                    "error": {
+                        "code": -32001,
+                        "message": "Synthetic uncertain delivery",
+                        "data": {"retry_safe": False},
+                    },
+                }
+            )
+            continue
         emit(
             {
                 "jsonrpc": "2.0",

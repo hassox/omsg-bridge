@@ -1,3 +1,6 @@
+import runpy
+from pathlib import Path
+
 import pytest
 
 from omsg_bridge.catalog import COMMANDS, build_argv, openapi
@@ -9,6 +12,12 @@ def test_catalog_covers_source_inventory():
     spec = openapi()
     for name in COMMANDS:
         assert f"/v1/{name}" in spec["paths"]
+
+
+def test_catalog_matches_released_cli_reference():
+    parse = runpy.run_path("scripts/import_catalog.py")["parse"]
+    reference = Path(__file__).with_name("fixtures") / "imsg-v0.19.1-help.md"
+    assert parse(reference.read_text()) == COMMANDS
 
 
 def test_cli_mapping():
@@ -27,6 +36,10 @@ def test_cli_mapping():
         "send",
     ]
     assert build_argv("completions", {"args": ["llm"]}) == ["completions", "--", "llm"]
+    assert build_argv(
+        "history", {"options": {"participants": ["one", "two"], "attachments": True}}
+    ) == ["history", "--json", "--participants=one", "--participants=two", "--attachments"]
+    assert build_argv("scheduled", {"args": ["list"]}) == ["scheduled", "--json", "--", "list"]
     assert "--stop=true" in build_argv("typing", {"options": {"stop": "true"}})
     assert "--reactions" in build_argv("watch", {"options": {"reactions": True}})
     assert "--reactions" not in build_argv("watch", {"options": {"reactions": False}})

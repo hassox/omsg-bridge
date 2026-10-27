@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import hmac
+import json
 import logging
 import shutil
 from urllib.parse import urlsplit
@@ -12,7 +13,7 @@ from . import __version__
 from .catalog import CATALOG, COMMANDS, openapi, query_payload
 from .config import DEFAULT_CONFIG, Settings, load_settings
 from .errors import APIError
-from .process import Bridge
+from .process import MAX_RECORD, Bridge
 from .streams import SOCKETS, close_socket, stream
 
 SETTINGS = web.AppKey("settings", Settings)
@@ -142,7 +143,13 @@ async def json_body(request):
         raise web.HTTPUnsupportedMediaType(reason="Use Content-Type: application/json")
     try:
         async with asyncio.timeout(10):
-            return await request.json()
+            # request.json() retains raw bytes on idle keep-alive connections.
+            data = bytearray()
+            async for chunk in request.content.iter_chunked(65536):
+                data.extend(chunk)
+                if len(data) > MAX_RECORD:
+                    raise web.HTTPRequestEntityTooLarge(max_size=MAX_RECORD, actual_size=len(data))
+            return json.loads(data)
     except TimeoutError as exc:
         raise web.HTTPRequestTimeout(
             reason="Request body did not arrive within 10 seconds"

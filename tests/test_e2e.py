@@ -131,3 +131,27 @@ async def test_memory_and_idle_cpu_plateau(running_server):
     assert samples[-1] - samples[1] < 8 * 1024
     assert cpu_after - cpu_before < 0.2
     assert samples[-1] < 128 * 1024
+
+
+async def test_idle_keep_alive_connections_do_not_retain_request_bodies(running_server):
+    proc, session, url, _ = running_server
+    for _ in range(5):
+        async with session.post(url + "/v1/chats", json={}) as response:
+            await response.read()
+    baseline = (await sample(proc.pid))[0]
+    peers = []
+    body = b"{}" + b" " * (900 * 1024)
+    try:
+        for _ in range(32):
+            peer = ClientSession(headers=session.headers)
+            peers.append(peer)
+            async with peer.post(
+                url + "/v1/chats", data=body, headers={"Content-Type": "application/json"}
+            ) as response:
+                assert response.status == 200
+                await response.read()
+        retained = (await sample(proc.pid))[0] - baseline
+        print(f"\nRSS growth with 32 idle large-body connections: {retained} KiB")
+        assert retained < 12 * 1024
+    finally:
+        await asyncio.gather(*(peer.close() for peer in peers))

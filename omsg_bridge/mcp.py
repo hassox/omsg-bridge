@@ -111,7 +111,10 @@ def create_mcp(url, settings):
             raise ValueError("Unknown action; use search_actions")
         if name == "watch":
             raise ValueError("Use WebSocket /v1/watch for streams; MCP calls are finite")
-        return await request(state["session"], f"/v1/{name}", payload)
+        result = await request(state["session"], f"/v1/{name}", payload)
+        if name == "rpc" and "error" in result:
+            raise ValueError("Upstream RPC error: " + json.dumps(result["error"]))
+        return result
 
     return mcp
 

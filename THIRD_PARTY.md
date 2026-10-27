@@ -9,8 +9,11 @@ Reference binary: https://github.com/openclaw/imsg/releases/download/v0.19.1/ims
 SHA-256: `adb176c1b00aa1e8abe3b5fe640fc0d84586282c5eac1b91aa328ef3a08acf31`
 Release tag: `aea7c22c2570d0fef883b34f077cc44e1bf2a508`.
 Source inspection also covered `31171997d03da82ef825777d351235ee21b357c9`.
-The release contains **38** commands. The downloaded reference was used only for
-`--version`, help and completions; no personal database access or mutations.
+The release contains **38** commands. `tests/fixtures/imsg-v0.19.1-help.md` is its
+harmless generated CLI reference, retained to check the complete catalog. The binary
+was used for `--version`, help/completions, and a read command pointed at an explicitly
+nonexistent temporary database to verify argument parsing. No personal database access
+or mutations occurred.
 
 Swagger UI assets are served locally from `swagger-ui-bundle` (Apache-2.0;
 license included in that dependency). No CDN receives API credentials or message data.

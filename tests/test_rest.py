@@ -61,6 +61,11 @@ async def test_timeout_and_missing_executable(aiohttp_client, fake_imsg):
     response = await client.post("/v1/send", json={"options": {"db": "slow"}})
     assert response.status == 504
     assert (await response.json())["error"]["retry_safe"] is False
+    response = await client.post(
+        "/v1/rpc?db=slow", json={"jsonrpc": "2.0", "id": 1, "method": "status"}
+    )
+    assert response.status == 504
+    assert (await response.json())["error"]["retry_safe"] is False
     client = await aiohttp_client(
         create_app(Settings(imsg="/nonexistent/imsg", auth_enabled=False))
     )
@@ -94,6 +99,10 @@ async def test_request_validation(client):
     ).status == 400
     assert (await client.post("/v1/chats", data="{}")).status == 415
     assert (await client.get("/v1/history?attachments=no")).status == 400
+    response = await client.post(
+        "/v1/chats", data=b"{}" + b" " * (1024 * 1024), headers={"Content-Type": "application/json"}
+    )
+    assert response.status == 413
 
 
 async def test_rest_rpc(client):

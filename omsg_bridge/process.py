@@ -149,17 +149,17 @@ class Bridge:
                 # A cancelled handshake can race OS process creation; still reap the result.
                 child = Child(await spawn)
                 raise
+            except OSError as exc:
+                raise APIError(
+                    503,
+                    "imsg_unavailable",
+                    "Cannot execute imsg. Install with: brew install steipete/tap/imsg; "
+                    "check the imsg setting and executable permissions.",
+                    retry_safe=True,
+                ) from exc
             child = Child(process)
             self.children.add(child)
             yield child
-        except OSError as exc:
-            raise APIError(
-                503,
-                "imsg_unavailable",
-                "Cannot execute imsg. Install with: brew install steipete/tap/imsg; "
-                "check the imsg setting and executable permissions.",
-                retry_safe=True,
-            ) from exc
         finally:
             try:
                 if child is not None:
